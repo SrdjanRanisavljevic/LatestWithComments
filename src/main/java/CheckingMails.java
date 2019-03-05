@@ -28,7 +28,7 @@ public class CheckingMails {
                     new javax.mail.Authenticator() {
                         protected PasswordAuthentication getPasswordAuthentication() {
                             return new PasswordAuthentication(
-                                    "manisha@gmail.com", "manisha123");
+                                    "johnnycashccapp@gmail.com", "cocacolapb1");
                         }
                     });
             // emailSession.setDebug(true);
@@ -53,6 +53,7 @@ public class CheckingMails {
                 System.out.println("Subject: " + message.getSubject());
                 System.out.println("From: " + message.getFrom()[0]);
                 System.out.println("Text: " + message.getContent().toString());
+                System.out.println(message.getContent());
             }
 
             // close the store and folder objects
@@ -72,8 +73,8 @@ public class CheckingMails {
 
         String host = "pop.gmail.com";// change accordingly
         String mailStoreType = "pop3";
-        String username = "abc@gmail.com";// change accordingly
-        String password = "*****";// change accordingly
+        String username = "johnnycashccapp@gmail.com";// change accordingly
+        String password = "cocacolapb1";// change accordingly
 
         check(host, mailStoreType, username, password);
 
