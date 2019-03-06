@@ -39,22 +39,25 @@ public class CheckingMails {
             store.connect();
 
             // create the folder object and open it
-            Folder emailFolder = store.getFolder("INBOX");
+            Folder emailFolder = store.getFolder("INBOX" );
             emailFolder.open(Folder.READ_ONLY);
 
             // retrieve the messages from the folder in an array and print it
             Message[] messages = emailFolder.getMessages();
             System.out.println("messages.length---" + messages.length);
 
-            for (int i = 0, n = messages.length; i < n; i++) {
-                Message message = messages[i];
+//            for (int i = 0, n = 4; i < n; i++) { //messages.length
+                Message message = messages[messages.length-1];
                 System.out.println("---------------------------------");
-                System.out.println("Email Number " + (i + 1));
+                System.out.println("Date " + message.getSentDate());
+                System.out.println("Email Number " + (messages.length));
                 System.out.println("Subject: " + message.getSubject());
                 System.out.println("From: " + message.getFrom()[0]);
                 System.out.println("Text: " + message.getContent().toString());
                 System.out.println(message.getContent());
-            }
+
+
+//            }
 
             // close the store and folder objects
             emailFolder.close(false);
