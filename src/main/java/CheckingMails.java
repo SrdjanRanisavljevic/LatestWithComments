@@ -72,6 +72,10 @@ public class CheckingMails {
         }
     }
 
+
+
+
+
     public static void main(String[] args) {
 
         String host = "pop.gmail.com";// change accordingly
