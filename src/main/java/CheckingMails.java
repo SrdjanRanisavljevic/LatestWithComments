@@ -99,18 +99,19 @@ public class CheckingMails {
         }
     }
 
-    /*
-     * This method would print FROM,TO and SUBJECT of the message
-     */
+
+//      This method would print SENDDATE, FROM,TO and SUBJECT of the message
+
     public static void writeEnvelope(Message m) throws Exception {
 
         Address[] a;
 
-        //SEND DATE
+        //SEND DATE ideja je da napravim da iscita trenutno vreme kad je krenula skripta
+//        i da u toj skripti uporedi vreme i da sendDate bude obavezno veci od vremena kad je krenula skripta!
         Date sendDate = m.getSentDate();
         System.out.println(sendDate);
 
-        // FROM
+        // FROM - cilj je da proveri i ovo pre nego sto krene bilo sta drugo
         if ((a = m.getFrom()) != null) {
             for (int j = 0; j < a.length; j++)
                 System.out.println("FROM: " + a[j].toString());
@@ -127,3 +128,7 @@ public class CheckingMails {
             System.out.println("SUBJECT: " + m.getSubject());
     }
 }
+
+//TREBA MI PRVO CLASSA KOJA CE DA PROVERAVA SEND TIME I SENDER
+// AKO SU SENDTIME > ScriptStart time && FROM = janrain@gmail.com) nastavi na cupanje maila
+// CHEKAJ NA janrain@gmail.com i to vreme koje je vec od sendtimea
