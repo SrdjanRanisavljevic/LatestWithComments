@@ -5,6 +5,7 @@ import org.jsoup.select.Elements;
 
 import javax.mail.*;
 import java.io.*;
+import java.util.Date;
 import java.util.Properties;
 
 public class CheckingMails {
@@ -23,13 +24,11 @@ public class CheckingMails {
 
             // create the POP3 store object and connect with the pop server
             Store store = emailSession.getStore("pop3s");
-
             store.connect(pop3Host, user, password);
 
             // create the folder object and open it
             Folder emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_ONLY);
-
             BufferedReader reader = new BufferedReader(new InputStreamReader(
                     System.in));
 
@@ -37,7 +36,7 @@ public class CheckingMails {
             Message[] messages = emailFolder.getMessages();
             System.out.println("messages.length---" + messages.length);
 
-            for (int i = messages.length-1; i > 0; i--) {
+            for (int i = messages.length - 1; i > 0; i--) {
                 Message message = messages[i];
                 System.out.println("---------------------------------");
                 writePart(message);
@@ -52,7 +51,6 @@ public class CheckingMails {
             // close the store and folder objects
             emailFolder.close(false);
             store.close();
-
         } catch (NoSuchProviderException e) {
             e.printStackTrace();
         } catch (MessagingException e) {
@@ -63,6 +61,7 @@ public class CheckingMails {
             e.printStackTrace();
         }
     }
+
     public static void main(String[] args) {
 
         String host = "pop.gmail.com";// change accordingly
@@ -75,110 +74,41 @@ public class CheckingMails {
 
     }
 
-    /*
-     * This method checks for content-type
-     * based on which, it processes and
-     * fetches the content of the message
-     */
+//     This method checks for content-type
+////   based on which, it processes and
+////   fetches the content of the message
+
     public static void writePart(Part p) throws Exception {
         if (p instanceof Message)
             //Call methods writeEnvelope
             writeEnvelope((Message) p);
 
-//        System.out.println("----------------------------");
-//        System.out.println("CONTENT-TYPE: " + p.getContentType());
-
-//        check if the content is plain text
-//        if (p.isMimeType("text/plain")) {
-//            System.out.println("This is plain text");
-//            System.out.println("---------------------------");
-//            System.out.println((String) p.getContent());
-//        }
-        //check if the content has attachment
-         if (p.isMimeType("multipart/*")) {    //Ovde treba ELSE ISPRED IF
-//            System.out.println("This is a Multipart");
-//            System.out.println("---------------------------");
+        if (p.isMimeType("multipart/*")) {
+            System.out.println("This is a Multipart");
+            System.out.println("---------------------------");
             Multipart mp = (Multipart) p.getContent();
-            int count = mp.getCount();
-            for (int i = 0; i < count; i++)
-                writePart(mp.getBodyPart(i));
+                writePart(mp.getBodyPart(1));
         }
-        //check if the content is a nested message
-//        else if (p.isMimeType("message/rfc822")) {
-//            System.out.println("This is a Nested Message");
-//            System.out.println("---------------------------");
-//            writePart((Part) p.getContent());
-//        }
-        //check if the content is an inline image
-//        else if (p.isMimeType("image/jpeg")) {
-//            System.out.println("--------> image/jpeg");
-//            Object o = p.getContent();
-//
-//            InputStream x = (InputStream) o;
-//            // Construct the required byte array
-//            System.out.println("x.length = " + x.available());
-//            while ((i = (int) ((InputStream) x).available()) > 0) {
-//                int result = (int) (((InputStream) x).read(bArray));
-//                if (result == -1)
-//                    int i = 0;
-//                byte[] bArray = new byte[x.available()];
-//
-//                break;
-//            }
-//            FileOutputStream f2 = new FileOutputStream("/tmp/image.jpg");
-//            f2.write(bArray);
-//        }
-//        else if (p.getContentType().contains("image/")) {
-//            System.out.println("content type" + p.getContentType());
-//            File f = new File("image" + new Date().getTime() + ".jpg");
-//            DataOutputStream output = new DataOutputStream(
-//                    new BufferedOutputStream(new FileOutputStream(f)));
-//            com.sun.mail.util.BASE64DecoderStream test =
-//                    (com.sun.mail.util.BASE64DecoderStream) p
-//                            .getContent();
-//            byte[] buffer = new byte[1024];
-//            int bytesRead;
-//            while ((bytesRead = test.read(buffer)) != -1) {
-//                output.write(buffer, 0, bytesRead);
-//            }
-//        }
         else {
-            Object o = p.getContent();
-            if (o instanceof String) {
-//                System.out.println("This is a string");
-//                System.out.println("---------------------------");
-//                System.out.println((String) o);
-
-
-                System.out.println("ISPARSIRANI ");
-                String html = (String) p.getContent();
-                Document doc = Jsoup.parse(html);
-                System.out.println(doc);
-            }
-//            else if (o instanceof InputStream) {
-//                System.out.println("This is just an input stream");
-//                System.out.println("---------------------------");
-//                InputStream is = (InputStream) o;
-//                is = (InputStream) o;
-//                int c;
-//                while ((c = is.read()) != -1)
-//                    System.out.write(c);
-//            }
-//            else {
-//                System.out.println("This is an unknown type");
-//                System.out.println("---------------------------");
-//                System.out.println(o.toString());
-//            }
+            String html = (String) p.getContent();
+            Document doc = Jsoup.parse(html);
+            Element magicLinkURL= doc.select("a").first();
+            String parsedLink = magicLinkURL.toString();
+            String codeSnippet = parsedLink.substring(60,92);
+            System.out.println(codeSnippet);
         }
-
     }
+
     /*
      * This method would print FROM,TO and SUBJECT of the message
      */
     public static void writeEnvelope(Message m) throws Exception {
-//        System.out.println("This is the message envelope");
-//        System.out.println("---------------------------");
+
         Address[] a;
+
+        //SEND DATE
+        Date sendDate = m.getSentDate();
+        System.out.println(sendDate);
 
         // FROM
         if ((a = m.getFrom()) != null) {
@@ -195,7 +125,5 @@ public class CheckingMails {
         // SUBJECT
         if (m.getSubject() != null)
             System.out.println("SUBJECT: " + m.getSubject());
-
     }
-
 }
