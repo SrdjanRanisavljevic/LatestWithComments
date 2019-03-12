@@ -10,8 +10,9 @@ import java.util.Properties;
 
 public class CheckingMails {
 
-    public static void fetch(String pop3Host, String storeType, String user,
+    public static String fetch(String pop3Host, String storeType, String user,
                              String password) {
+        String cs = "";
         try {
             // create properties field
             Properties properties = new Properties();
@@ -29,24 +30,26 @@ public class CheckingMails {
             // create the folder object and open it
             Folder emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_ONLY);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    System.in));
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(
+//                    System.in));
 
             // retrieve the messages from the folder in an array and print it
             Message[] messages = emailFolder.getMessages();
             System.out.println("messages.length---" + messages.length);
 
-            for (int i = messages.length - 1; i > 0; i--) {
-                Message message = messages[i];
-                System.out.println("---------------------------------");
-                writePart(message);
-                String line = reader.readLine();
-                if ("YES".equals(line)) {
-                    message.writeTo(System.out);
-                } else if ("QUIT".equals(line)) {
-                    break;
-                }
-            }
+            cs = writePart(messages[(messages.length - 1)]);
+//            for (int i = messages.length - 1; i > 0; i--) {
+//                Message message = messages[i];
+//                System.out.println("---------------------------------");
+//                writePart(message);
+//                break;
+//                String line = reader.readLine();
+//                if ("YES".equals(line)) {
+//                    message.writeTo(System.out);
+//                } else if ("QUIT".equals(line)) {
+//                    break;
+//                }
+//            }
 
             // close the store and folder objects
             emailFolder.close(false);
@@ -59,26 +62,18 @@ public class CheckingMails {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
+        }finally {
+            return cs;
         }
     }
 
-    public static void main(String[] args) {
 
-        String host = "pop.gmail.com";// change accordingly
-        String mailStoreType = "pop3";
-        String username = "johnnycashccapp@gmail.com";// change accordingly
-        String password = "cocacolapb1";// change accordingly
-
-        //Call method fetch
-        fetch(host, mailStoreType, username, password);
-
-    }
 
 //     This method checks for content-type
 ////   based on which, it processes and
 ////   fetches the content of the message
 
-    public static void writePart(Part p) throws Exception {
+    public static String writePart(Part p) throws Exception {
         if (p instanceof Message)
             //Call methods writeEnvelope
             writeEnvelope((Message) p);
@@ -87,7 +82,16 @@ public class CheckingMails {
             System.out.println("This is a Multipart");
             System.out.println("---------------------------");
             Multipart mp = (Multipart) p.getContent();
-                writePart(mp.getBodyPart(1));
+
+            String strMultiPart  = (String) mp.getBodyPart(1).getContent();
+            Document docMultiPart = Jsoup.parse(strMultiPart);
+            Element magicLinkURL = docMultiPart.select("a").first();
+            String parsedLink = magicLinkURL.toString();
+            String codeSnippet = parsedLink.substring(60,92);
+//            System.out.println(codeSnippet);
+            return codeSnippet;
+//                writePart(mp.getBodyPart(1));
+
         }
         else {
             String html = (String) p.getContent();
@@ -95,8 +99,10 @@ public class CheckingMails {
             Element magicLinkURL= doc.select("a").first();
             String parsedLink = magicLinkURL.toString();
             String codeSnippet = parsedLink.substring(60,92);
-            System.out.println(codeSnippet);
+//            System.out.println(codeSnippet);
+            return codeSnippet;
         }
+
     }
 
 
@@ -127,8 +133,12 @@ public class CheckingMails {
         if (m.getSubject() != null)
             System.out.println("SUBJECT: " + m.getSubject());
     }
+
+
 }
 
 //TREBA MI PRVO CLASSA KOJA CE DA PROVERAVA SEND TIME I SENDER
 // AKO SU SENDTIME > ScriptStart time && FROM = janrain@gmail.com) nastavi na cupanje maila
 // CHEKAJ NA janrain@gmail.com i to vreme koje je vec od sendtimea
+
+
