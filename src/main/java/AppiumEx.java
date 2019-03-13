@@ -1,11 +1,10 @@
-import io.appium.java_client.MobileElement;
-import io.appium.java_client.android.AndroidDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import javax.mail.Message;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Date;
+
+import io.appium.java_client.MobileElement;
+import io.appium.java_client.android.AndroidDriver;
 
 public class AppiumEx {
 
@@ -23,7 +22,7 @@ public class AppiumEx {
         capabilities.setCapability("appActivity", "com.cocacola.stories.main.MainActivity");
 
         try {
-            driver = new AndroidDriver(new URL("http://127.0.0.1:4723/wd/hub"),capabilities);
+            driver = new AndroidDriver(new URL("http://172.18.0.2:4723/wd/hub"),capabilities);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
