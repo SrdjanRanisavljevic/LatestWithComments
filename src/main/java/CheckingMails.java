@@ -11,7 +11,7 @@ import java.util.Properties;
 public class CheckingMails {
 
     public Message fetch(String pop3Host, String storeType, String user,
-                             String password) {
+                         String password) {
 
         Message returnedMessage = null;
         String cs = "";
@@ -38,7 +38,7 @@ public class CheckingMails {
             Message[] messages = emailFolder.getMessages();
             System.out.println("messages.length---" + messages.length);
 
-            returnedMessage =  messages[(messages.length-1)];
+            returnedMessage = messages[(messages.length - 1)];
 //            cs = writePart(messages[(messages.length - 1)]);
 
 
@@ -53,14 +53,14 @@ public class CheckingMails {
 //            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             return returnedMessage;
         }
     }
 
 
-
-             // This method checks for content-type based on which, it processes and fetches the content of the message
+    // This method checks for content-type based on which, it processes and fetches the content of the message.
+    // CONFIGURED LIKE THIS, IT RETURNS THE CODE SNIPPET REQUIRED FOR VERIFICATION
 
     public String writePart(Part p) throws Exception {
         if (p instanceof Message)
@@ -72,81 +72,130 @@ public class CheckingMails {
             System.out.println("---------------------------");
             Multipart mp = (Multipart) p.getContent();
 
-            String strMultiPart  = (String) mp.getBodyPart(1).getContent();
+            String strMultiPart = (String) mp.getBodyPart(1).getContent();
             Document docMultiPart = Jsoup.parse(strMultiPart);
             Element magicLinkURL = docMultiPart.select("a").first();
             String parsedLink = magicLinkURL.toString();
-            String codeSnippet = parsedLink.substring(72,106);
+            String codeSnippet = parsedLink.substring(72, 106);
             return codeSnippet;
 
 
-        }
-        else {
+        } else {
             String html = (String) p.getContent();
             Document doc = Jsoup.parse(html);
-            Element magicLinkURL= doc.select("a").first();
+            Element magicLinkURL = doc.select("a").first();
             String parsedLink = magicLinkURL.toString();
-            String codeSnippet = parsedLink.substring(72,106);
-//            System.out.println(codeSnippet);
+            String codeSnippet = parsedLink.substring(72, 106);
             return codeSnippet;
         }
 
     }
 
 
-//      This method would print SENDDATE, FROM,TO and SUBJECT of the message
-
+    //This method would print SENDDATE, FROM,TO and SUBJECT of the message
     public static void writeEnvelope(Message m) throws Exception {
 
-
         Address[] a;
-
-        //SEND DATE ideja je da napravim da iscita trenutno vreme kad je krenula skripta
-//        i da u toj skripti uporedi vreme i da sendDate bude obavezno veci od vremena kad je krenula skripta!
         Date sendDate = m.getSentDate();
         System.out.println(sendDate);
-
-        // FROM - cilj je da proveri i ovo pre nego sto krene bilo sta drugo
+        // FROM
         if ((a = m.getFrom()) != null) {
             for (int j = 0; j < a.length; j++)
                 System.out.println("FROM: " + a[j].toString());
+            // TO
+            if ((a = m.getRecipients(Message.RecipientType.TO)) != null) {
+                for (int j = 0; j < a.length; j++)
+                    System.out.println("TO: " + a[j].toString());
+            }
+            // SUBJECT
+            if (m.getSubject() != null)
+                System.out.println("SUBJECT: " + m.getSubject());
         }
-
-        // TO
-        if ((a = m.getRecipients(Message.RecipientType.TO)) != null) {
-            for (int j = 0; j < a.length; j++)
-                System.out.println("TO: " + a[j].toString());
-        }
-
-        // SUBJECT
-        if (m.getSubject() != null)
-            System.out.println("SUBJECT: " + m.getSubject());
     }
 
-    // This method retrieves sendDate for needed for checking the email with valid magic link
 
-    public Date retrieveSendDate (Message m) throws Exception {
+    // This method returns sendDate for needed for checking the email with valid magic link
+
+    public Date retrieveSendDate(Message m) throws Exception {
 
         Address[] a;
-
         Date sendDate = m.getSentDate();
         System.out.println(sendDate);
         return sendDate;
     }
 
-    public String getSender (Message m) throws Exception {
+    // This method returns SENDER of the mail
+
+    public String getSender(Message m) throws Exception {
         Address[] a;
         String sender = "";
         if ((a = m.getFrom()) != null) {
             for (int j = 0; j < a.length; j++)
-                sender =  a[j].toString();
+                sender = a[j].toString();
         }
         return sender;
+    }
 
+    public boolean isRightMail() { //IF SENDER = noreply@janrain.com and mailTime<start time of the test returns TRUE!!!
+        String host = "pop.gmail.com";// change accordingly
+        String mailStoreType = "pop3";
+        String username = "johnnycashccapp@gmail.com";// change accordingly
+        String password = "cocacolapb1";// change accordingly
+        Date testStart = AppiumEx.testStart;
+
+        try {
+            String sender = getSender(fetch(host, mailStoreType, username, password));
+            Date mailDate = retrieveSendDate(fetch(host, mailStoreType, username, password));
+            if ((testStart.compareTo(mailDate) < 0) && (sender.equals("noreply@janrain.com"))) {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        return false;
     }
 
 
+    public String returnCodeSnippet() {
+        boolean status = false;
+        int counter = 0; // NUMBER OF ATTEMPTS OF GETTING THE RIGHT EMAIL
+
+        CheckingMails cm = new CheckingMails();
+        String host = "pop.gmail.com";// change accordingly
+        String mailStoreType = "pop3";
+        String username = "johnnycashccapp@gmail.com";// change accordingly
+        String password = "cocacolapb1";// change accordingly
+
+        while (!status || counter == 5) {
+            status = cm.isRightMail();
+            counter++;
+
+            if (status) {
+                try {
+                    return cm.writePart(cm.fetch(host, mailStoreType, username, password));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                }
+            else if (counter == 5) {
+                break;                       // BREAKS THE SKRIPT AND RETURNS "Email didn't arrive";
+            }
+             else {
+                try {
+                    Thread.sleep(2000); // WAITING FOR 2 SECONDS, THAN TRYING TO GET THE SNIPPET AGAIN
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+            return "Email didn't arrive";
+    }
 }
+
+
+
 
 
 

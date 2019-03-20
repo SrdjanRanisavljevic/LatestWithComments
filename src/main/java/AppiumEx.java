@@ -2,6 +2,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 
 import io.appium.java_client.MobileElement;
 import io.appium.java_client.android.AndroidDriver;
@@ -9,6 +10,7 @@ import io.appium.java_client.android.AndroidDriver;
 public class AppiumEx {
 
     private static AndroidDriver driver;
+    public static Date testStart = new Date();
 
     public static void main(String[] args) {
 
@@ -64,25 +66,15 @@ public class AppiumEx {
         enter_code.click();
 
         try {
-            Thread.sleep(10000);
+            Thread.sleep(8000);   // WAITS 8 SECONDS FOR THE ARRIVAL OF THE MAIL
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        //OVDE IDE KOD ZA CHUPANJE MAILA
-
-        String host = "pop.gmail.com";// change accordingly
-        String mailStoreType = "pop3";
-        String username = "johnnycashccapp@gmail.com";// change accordingly
-        String password = "cocacolapb1";// change accordingly
-        String code = "";
+        //COPIES CODE SNIPPET TO ENTER VERIFICATION CODE FIELD
         CheckingMails cm = new CheckingMails();
-        try {
-           code = cm.writePart(cm.fetch(host, mailStoreType, username, password));
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        String code = cm.returnCodeSnippet();
+
 
         MobileElement text_value = (MobileElement) driver.findElementById("text_value");
         text_value.click();
@@ -97,38 +89,10 @@ public class AppiumEx {
             e.printStackTrace();
         }
 
+        // SKIPS TUTORIAL
         MobileElement tutorial_skip = (MobileElement) driver.findElementById("tutorial_skip");
         tutorial_skip.click();
 
-//        Date start = new java.util.Date(); // Date of the start of the script;
-//        System.out.println(start);
-//        Date mailDate = null; // date on which mail arrived. It should be later the start date.
-//        String from = "";
-//
-//        String host = "pop.gmail.com";// change accordingly
-//        String mailStoreType = "pop3";
-//        String username = "johnnycashccapp@gmail.com";// change accordingly
-//        String password = "cocacolapb1";// change accordingly
-//
-//
-//
-//
-//        CheckingMails cm = new CheckingMails();
-//
-//        // Get mailDate
-////        try {
-////          mailDate = cm.retrieveSendDate(cm.fetch(host, mailStoreType, username,password));
-////
-////        } catch (Exception e) {
-////            e.printStackTrace();
-////        }
-////
-////        // get sender
-////        try {
-////            from = cm.getSender(cm.fetch(host, mailStoreType, username,password));
-////
-////        } catch (Exception e) {
-////            e.printStackTrace();
-////        }
+
    }
 }
